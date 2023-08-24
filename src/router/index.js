@@ -2,10 +2,10 @@ import {createRouter,createWebHashHistory} from "vue-router";
 
 const constantRoutes = [
     {
-        path:'/',
-        name: 'login',
-        component: () => import('@/views/login'),
-    }
+        path: '/login',
+        component: () => import('@/views/Login'),
+        meta: {title: '登录'}
+    },
 ];
 
 
