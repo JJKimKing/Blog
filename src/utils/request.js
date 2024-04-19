@@ -1,52 +1,62 @@
 import axios from "axios";
-import {getToken} from "@/utils/auth";
-import ErrorCode from "@/utils/errorCode";
+import {useUserStoreHook} from "@/store/modules/user";
+import {ElMessage} from "element-plus";
+import {ElMessageBox} from 'element-plus';
 
+
+// 创建 axios 实例
 const service = axios.create({
-    baseURL: window.__BASE_URL__, timeout: 10000,
+    baseURL: __BASE_URL__,
+    timeout: 50000,
+    headers: {"Content-Type": "application/json;charset=utf-8"},
 });
 
-export let isRelogin={show: false}
-
-
-//添加请求拦截器
-service.interceptors.request.use(config => {
-    //是否需要设置token
-    const token = (config.headers || {}).isToken === false;
-    if (getToken() && !token) {
-        config.headers['Authorization'] = 'Bearer ' + getToken();
-    }
-    return config;
-}, error => {
-    console.log(error)
-    return Promise.reject(error);
-})
-
-
-//添加响应拦截器
-service.interceptors.response.use(res => {
-    const code = res.data.code || 200;
-    const msg = ErrorCode[code] || res.data.result;
-    if (code === 401) {
-        //重新登陆
-        if (!isRelogin.show) {
-
+service.interceptors.request.use(
+    config => {
+        const userStore = useUserStoreHook()
+        const token = userStore.token;
+        if (token) {
+            config.headers.Authorization = `Bearer {token}`;
         }
+        return config;
+    }, (error) => {
+        return Promise.reject(error);
+    })
+
+
+service.interceptors.response.use(response => {
+        const {code, msg} = response.data;
+        console.log(response.data);
+
+        if (code === 200) {
+            return response;
+        }
+        if (response.data instanceof ArrayBuffer) {
+            return response;
+        }
+
+        ElMessage.error(msg || "系统出错");
+        return Promise.reject(new Error(msg || "Error"));
+    }, (error) => {
+        if (error.response.data) {
+            const {code, msg} = error.response.data;
+            // token 过期,重新登录
+            if (code === "401") {
+                ElMessageBox.confirm("当前页面已失效，请重新登录", "提示", {
+                    confirmButtonText: "确定",
+                    type: "warning",
+                }).then(() => {
+                    const userStore = useUserStoreHook();
+                    userStore.resetToken().then(() => {
+                        location.reload();
+                    });
+                });
+            } else {
+                ElMessage.error(msg || "系统出错");
+            }
+        }
+        return Promise.reject(error.message);
     }
-    if (code === 500) {
-
-        return Promise.reject(new Error(msg));
-    }
-    if (code !== 200) {
-
-        return Promise.reject('error')
-    } else {
-        return res.data;
-    }
-
-}, error => {
-
-})
-
-
+)
 export default service;
+

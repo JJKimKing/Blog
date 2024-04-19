@@ -1,0 +1,8 @@
+
+
+
+@media screen and(max-height: 767px) {
+    .m-mobile-hide{
+        display: none;!important;
+    }
+}

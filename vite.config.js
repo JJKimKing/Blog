@@ -1,5 +1,5 @@
 import {defineConfig, loadEnv} from "vite";
-import path from 'path'
+import {resolve} from "path";
 import createVitePlugins from "./vite/plugins";
 
 export default defineConfig(({mode, command}) => {
@@ -7,14 +7,13 @@ export default defineConfig(({mode, command}) => {
     const {VITE_APP_ENV, VITE_APP_BASE_API, VITE_TOKEN_KEY} = env
     return {
         base: VITE_APP_ENV === 'production' ? "/" : "/",
-        plugins: [
-            createVitePlugins(env, command === 'build'),
-        ],
+        plugins: createVitePlugins(env, command === 'build'),
         mode: VITE_APP_ENV,
         define: {
             _VITE_ENV_: JSON.stringify(VITE_APP_ENV).toLocaleString(),
             __BASE_URL__: JSON.stringify(VITE_APP_BASE_API).toLocaleString(),
-            __TOKEN__: JSON.stringify(VITE_TOKEN_KEY).toLocaleString()
+            __TOKEN__: JSON.stringify(VITE_TOKEN_KEY).toLocaleString(),
+            __VUE_PROD_DEVTOOLS__: true,
         },
         //存储缓存文件的目录
         cacheDir: "node_modules/.vite",
@@ -23,9 +22,9 @@ export default defineConfig(({mode, command}) => {
         resolve: {
             alias: {
                 // 设置路径
-                '~': path.resolve(__dirname, './'),
+                '~': resolve(__dirname, './'),
                 // 设置别名
-                '@': path.resolve(__dirname, './src')
+                '@': resolve(__dirname, './src')
             },
             extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue']
         },
@@ -38,28 +37,19 @@ export default defineConfig(({mode, command}) => {
             //自动打开浏览器
             open: VITE_APP_ENV === 'development',
             //跨域 cors
-            proxy: {
-                '/dev-api': {
-                    target: 'http://localhost:50007',
-                    changeOrigin: true,
-                    rewrite: (p) => p.replace(/^\/dev-api/, '')
-                }
-            }
+            // proxy: {
+            //     '/dev-api': {
+            //         target: 'http://localhost:50007',
+            //         changeOrigin: true,
+            //         rewrite: (p) => p.replace(/^\/dev-api/, '')
+            //     }
+            // }
         },
         css: {
-            postcss: {
-                plugins: [
-                    {
-                        postcssPlugin: 'internal:charset-removal',
-                        AtRule: {
-                            charset: (atRule) => {
-                                if (atRule.name === 'charset') {
-                                    atRule.remove();
-                                }
-                            }
-                        }
-                    }
-                ]
+            preprocessorOptions: {
+                sass: {
+                    additionalData: `$injectedColor: orange;`
+                },
             }
         }
     }
