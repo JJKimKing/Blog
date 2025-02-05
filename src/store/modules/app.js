@@ -1,16 +1,12 @@
-import { defineStore } from "pinia";
-
-export const useAppStore=defineStore('app',{
-    state: () => {
-
-    },
-
-    actions:{
-
-    },
+import {defineStore} from "pinia";
+import {useDark, useToggle} from '@vueuse/core'
 
 
-    getters:{
-
+const useAppStore = defineStore('app', () => {
+    const isDark = useDark();
+    function toggleDark() {
+        useToggle(isDark)
     }
+    return {isDark, toggleDark}
 })
+export default useAppStore;

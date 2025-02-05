@@ -1,89 +1,85 @@
 <template>
-  <div class="login">
-    <el-form ref="loginRef" :model="loginForm" :rules="loginRules" class="login-from">
-      <h3 class="title">{{ userStore.title }}</h3>
-      <el-form-item prop="username">
-        <el-input type="text"
-                  placeholder="账号"
-                  v-model="loginForm.username"
-                  auto-complete="off"
-                  size="large">
-        <template #prefix>
-          <svg-icon icon-class="user" class="el-input__icon input-icon"/>
-        </template>
-        </el-input>
-      </el-form-item>
-      <el-form-item prop="password">
-        <el-input
-            type="password"
-            autocomplete="off"
-            v-model="loginForm.password"
-            placeholder="密码"
-            size="large">
-        <template #prefix>
-          <svg-icon icon-class="password" class="el-input__icon input-icon"/>
-        </template>
-        </el-input>
-      </el-form-item>
-    </el-form>
+  <div class="login-box">
+    <el-image :src="backgroundImg" fit="fill" class="login-bk-img"/>
+    <div class="login-header">
+      <!--      主题-->
+      <el-switch v-model="isDark"
+                 size="large"
+                 inline-prompt
+                 :active-icon="day"
+                 :inactive-icon="dark"
+                 @change="toggleDark">
+      </el-switch>
+    </div>
+    <div class="login-container">
+      <div class="img">
+        <component :is="toRaw(illustration)"></component>
+      </div>
+    </div>
+    <div>
+
+    </div>
   </div>
 </template>
 
 <script setup>
-import useSettingsStore from "@/store/modules/settings";
+// 导入背景图片
+import backgroundImg from "@/assets/image/bg.png";
+import dark from "@/assets/icons/svg/dark.svg";
+import day from '@/assets/icons/svg/day.svg';
+import illustration from '@/assets/image/illustration.svg'
+import useAppStore from '@/store/modules/app';
+import {storeToRefs} from "pinia";
+import {toRaw} from "vue";
 
-const userStore = useSettingsStore();
-import {ref} from "vue";
-import {Minus} from "@element-plus/icons-vue";
-
-
-const loginForm = ref({
-  username: 'admin',
-  password: 'admin123',
-  rememberMe: false,
-  code: "",
-  uuid: ""
-});
-
-
-const loginRules = {}
+const {isDark, toggleDark} = storeToRefs(useAppStore());
 
 </script>
 
 
 <style lang="scss" scoped>
-.login {
+.login-box {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
-  background-image: url("@/assets/image/bg.png");
-  background-size: cover;
-}
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
 
-.title {
-  margin: 0px auto 30px auto;
-  text-align: center;
-  color: #707070;
-}
 
-.login-from {
-  border-radius: 6px;
-  background-color: #ffffff;
-  width: 400px;
-  padding: 25px 25px 5px 25px;
+  .login-bk-img {
+    position: absolute;
+    height: 100%;
+    width: 80%;
+    left: 0;
+    bottom: 0;
+    z-index: -1;
+  }
 
-  .el-input {
-    height: 40px;
+  .login-header {
+    position: fixed;
+    right: 5vh;
+    top: 1vw;
+    z-index: 3;
+  }
 
-    input {
-      height: 40px;
-    }
-    .input-icon {
-      height: 39px;
-      width: 14px;
-      margin-left: 0px;
-    }
+  .login-container {
+    width: 100vw;
+    height: 100vh;
+    max-width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 18rem;
+    padding: 0 2rem;
+  }
+
+  .img {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    position: relative;
+    left: -10vw;
+    top: 2vh;
   }
 }
 </style>
